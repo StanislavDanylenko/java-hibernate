@@ -1,0 +1,11 @@
+version: "3.9"
+
+services:
+  postgres-jdbc:
+    image: postgres:15.2
+    environment:
+      POSTGRES_DB: "test-hibernate"
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "password"
+    ports:
+      - "5442:5432"

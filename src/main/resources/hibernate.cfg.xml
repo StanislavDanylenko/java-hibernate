@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+
+    <session-factory>
+
+        <!-- Database connection settings -->
+        <property name="connection.driver_class">org.postgresql.Driver</property>
+        <property name="connection.url">jdbc:postgresql://localhost:5442/test-hibernate</property>
+        <property name="connection.username">user</property>
+        <property name="connection.password">password</property>
+        <property name="hibernate.current_session_context_class">thread</property>
+        <property name="hibernate.hbm2ddl.auto">create-drop</property>
+        <!-- SQL dialect -->
+        <property name="dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+
+        <!-- Echo all executed SQL to stdout -->
+        <property name="show_sql">true</property>
+
+        <!-- EhCache -->
+        <property name="hibernate.cache.region.factory_class">jcache</property>
+        <property name="hibernate.javax.cache.provider">org.ehcache.jsr107.EhcacheCachingProvider</property>
+        <property name="hibernate.javax.cache.uri">ehcache.xml</property>
+        <property name="hibernate.cache.use_second_level_cache">true</property>
+        <property name="hibernate.generate_statistics">true</property>
+
+        <!-- Names the annotated entity class -->
+        <mapping class="stanislav.danylenko.hibernate.entities.Book"/>
+    </session-factory>
+
+</hibernate-configuration>
