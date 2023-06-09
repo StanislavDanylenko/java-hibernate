@@ -10,7 +10,7 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 // not a singleton really, simplified for example
 public final class HibernateUtil {
 
-    private static HibernateUtil hibernateUtil;
+    private static HibernateUtil instance;
     private final SessionFactory sessionFactory;
 
     private HibernateUtil() {
@@ -18,16 +18,14 @@ public final class HibernateUtil {
     }
 
     public static HibernateUtil getInstance() {
-        if (hibernateUtil == null) {
-            hibernateUtil = new HibernateUtil();
+        if (instance == null) {
+            instance = new HibernateUtil();
         }
-        return hibernateUtil;
+        return instance;
     }
 
     public SessionFactory buildSessionFactory() {
-        StandardServiceRegistry standardRegistry = new StandardServiceRegistryBuilder()
-                .configure()
-                .build();
+        StandardServiceRegistry standardRegistry = new StandardServiceRegistryBuilder().configure().build();
 
         Metadata metadata = new MetadataSources(standardRegistry)
 //                .addAnnotatedClass(Book.class)

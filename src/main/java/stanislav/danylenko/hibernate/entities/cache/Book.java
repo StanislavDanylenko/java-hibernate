@@ -1,13 +1,9 @@
-package stanislav.danylenko.hibernate.entities;
+package stanislav.danylenko.hibernate.entities.cache;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 @Entity
 @Table(name = "books")
-@Cacheable
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Book {
 
     @Id
