@@ -19,6 +19,7 @@
 
         <!-- Echo all executed SQL to stdout -->
         <property name="show_sql">true</property>
+        <property name="format_sql">true</property>
 
         <!-- EhCache -->
         <property name="hibernate.cache.region.factory_class">jcache</property>
@@ -30,6 +31,7 @@
         <!-- Names the annotated entity class -->
         <mapping class="stanislav.danylenko.hibernate.entities.cache.Book"/>
         <mapping class="stanislav.danylenko.hibernate.entities.cache.BookCache"/>
+        <mapping class="stanislav.danylenko.hibernate.entities.lifecycle.Person"/>
     </session-factory>
 
 </hibernate-configuration>
