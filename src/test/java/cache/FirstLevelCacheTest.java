@@ -1,29 +1,41 @@
-package stanislav.danylenko.hibernate.examples;
+package cache;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.junit.jupiter.api.Test;
 import stanislav.danylenko.hibernate.config.HibernateUtil;
 import stanislav.danylenko.hibernate.entities.cache.Book;
 
 import java.util.List;
 
-public class FirstLevelCache {
-    public static void main(String[] args) {
-        createBooks();
+class FirstLevelCacheTest {
 
+    @Test
+    void testFindAllBooks() {
+        createBooks();
         findBooks();
+    }
+
+    @Test
+    void testFLCache() {
+        createBooks();
 
         // 2 queries, not 4
         findBookInOneTransaction();
         findBookInOneTransaction();
+    }
+
+    @Test
+    void testFLCacheNotWork() {
+        createBooks();
 
         // cache is not working here
         String bookName = "Core Java";
-        findBookByName(bookName);
-        findBookByName(bookName);
+        findBookByNameInOneTransaction(bookName);
+        findBookByNameInOneTransaction(bookName);
     }
 
-    private static void createBooks() {
+    private void createBooks() {
         Book book = new Book("Core Java", "Learn Core Java with Coding Examples");
         Book book1 = new Book("Learn Hibernate", "Learn Hibernate with building projects");
         Transaction transaction = null;
@@ -42,7 +54,7 @@ public class FirstLevelCache {
         }
     }
 
-    private static void findBooks() {
+    private void findBooks() {
         try (Session session = HibernateUtil.getInstance().getSessionFactory().openSession()) {
             List<Book> books = session.createQuery("from Book", Book.class).list();
             books.forEach(b -> System.out.println("Print book name : " + b.getName()));
@@ -51,7 +63,7 @@ public class FirstLevelCache {
         }
     }
 
-    private static void findBookInOneTransaction() {
+    private void findBookInOneTransaction() {
         try (Session session = HibernateUtil.getInstance().getSessionFactory().openSession()) {
             Book book = session.find(Book.class, 1L);
             System.out.println("get book 1 time: " + book.getDescription());
@@ -63,19 +75,20 @@ public class FirstLevelCache {
         }
     }
 
-    private static void findBookByName(String name) {
+    private void findBookByNameInOneTransaction(String name) {
         try (Session session = HibernateUtil.getInstance().getSessionFactory().openSession()) {
             Book book1 = session.createQuery("select b from Book b where b.name=:name", Book.class)
-                                .setParameter("name", name)
-                                .getSingleResult();
+                    .setParameter("name", name)
+                    .getSingleResult();
             System.out.println("name get book 1 time: " + book1.getDescription());
 
             Book book2 = session.createQuery("select b from Book b where b.name=:name", Book.class)
-                                .setParameter("name", name)
-                                .getSingleResult();
+                    .setParameter("name", name)
+                    .getSingleResult();
             System.out.println("name get book 2 time: " + book2.getDescription());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
 }

@@ -1,14 +1,17 @@
-package stanislav.danylenko.hibernate.examples;
+package cache;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.junit.jupiter.api.Test;
 import stanislav.danylenko.hibernate.config.HibernateUtil;
 import stanislav.danylenko.hibernate.entities.cache.BookCache;
 
 import java.util.List;
 
-public class SecondLevelCache {
-    public static void main(String[] args) {
+class SecondLevelCacheTest {
+
+    @Test
+    void test2LCache() {
         createBooks();
 
         findBooks();
@@ -16,11 +19,18 @@ public class SecondLevelCache {
         // 0 queries, not 4, read from L2C
         findBookInOneTransaction();
         findBookInOneTransaction();
+    }
+
+    @Test
+    void test2LCacheNotWork() {
+        createBooks();
+
+        findBooks();
 
         // cache is not working here
         String bookName = "Core Java";
-        findBookByName(bookName);
-        findBookByName(bookName);
+        findBookByNameInOneTransaction(bookName);
+        findBookByNameInOneTransaction(bookName);
     }
 
     private static void createBooks() {
@@ -62,7 +72,7 @@ public class SecondLevelCache {
         }
     }
 
-    private static void findBookByName(String name) {
+    private static void findBookByNameInOneTransaction(String name) {
         try (Session session = HibernateUtil.getInstance().getSessionFactory().openSession()) {
             BookCache book1 = session.createQuery("select b from BookCache b where b.name=:name", BookCache.class)
                     .setParameter("name", name)
@@ -77,4 +87,5 @@ public class SecondLevelCache {
             e.printStackTrace();
         }
     }
+
 }
