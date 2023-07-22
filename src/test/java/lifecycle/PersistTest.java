@@ -26,7 +26,7 @@ class PersistTest {
             return person;
         });
 
-        List<Person> persons = HibernateUtil.doInSessionWithTransactionReturning(session -> {
+        List<Person> persons = HibernateUtil.doInSessionReturning(session -> {
             Query<Person> query = session.createQuery("FROM Person", Person.class);
             return query.list();
         });
@@ -41,7 +41,7 @@ class PersistTest {
             session.persist(person);
         });
 
-        List<Person> persons = HibernateUtil.doInSessionWithTransactionReturning(session -> {
+        List<Person> persons = HibernateUtil.doInSessionReturning(session -> {
             Query<Person> query = session.createQuery("FROM Person", Person.class);
             return query.list();
         });
@@ -57,7 +57,7 @@ class PersistTest {
             session.flush(); // populate ID
         });
 
-        List<Person> persons = HibernateUtil.doInSessionWithTransactionReturning(session -> {
+        List<Person> persons = HibernateUtil.doInSessionReturning(session -> {
             Query<Person> query = session.createQuery("FROM Person", Person.class);
             return query.list();
         });

@@ -76,7 +76,7 @@ public final class HibernateUtil {
     }
 
     public static void doInSession(Consumer<Session> sessionConsumer) {
-        try (Session session = getInstance().getSessionFactory().getCurrentSession()) {
+        try (Session session = getInstance().getSessionFactory().openSession()) {
             sessionConsumer.accept(session);
         } catch (Exception e) {
             throw new RuntimeException("Something went wrong when performing operations with db", e);
@@ -84,7 +84,7 @@ public final class HibernateUtil {
     }
 
     public static <T> T doInSessionReturning(Function<Session, T> sessionFunction) {
-        try (Session session = getInstance().getSessionFactory().getCurrentSession()) {
+        try (Session session = getInstance().getSessionFactory().openSession()) {
             return sessionFunction.apply(session);
         } catch (Exception e) {
             throw new RuntimeException("Something went wrong when performing operations with db", e);
