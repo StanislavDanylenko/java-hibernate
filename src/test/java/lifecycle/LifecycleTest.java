@@ -10,6 +10,8 @@ class LifecycleTest {
 
     @Test
     void lifecycleTest() {
+        System.out.println("Start");
+
         // New (Transient)
         Person person = new Person("Some name", Instant.ofEpochSecond(1690034000), true);
         System.out.println(person);
@@ -23,6 +25,13 @@ class LifecycleTest {
         System.out.println(person);
         Person person1 = HibernateUtil.doInSessionReturning(session -> session.get(Person.class, person.getId()));
         System.out.println(person1);
+
+        // Removed
+        HibernateUtil.doInSessionWithTransaction(session -> session.remove(person1));
+
+        // No more in the DB
+        Person person2 = HibernateUtil.doInSessionReturning(session -> session.get(Person.class, person.getId()));
+        System.out.println(person2);
     }
 
 }
