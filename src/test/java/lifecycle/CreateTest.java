@@ -9,7 +9,7 @@ import stanislav.danylenko.hibernate.entities.lifecycle.Person;
 import java.time.Instant;
 import java.util.List;
 
-class PersistTest {
+class CreateTest {
 
     /* SAVE vs PERSIST
      * 1) save returns an identifier when persist is void
@@ -103,12 +103,49 @@ class PersistTest {
     @Test
     void testPersistDirtySaveAtCommit() {
         Person finalPerson = HibernateUtil.doInSessionWithTransactionReturning(session -> {
-            Person person = new Person("Stas Save", Instant.ofEpochSecond(1690034000), true);
+            Person person = new Person("Stas Persist", Instant.ofEpochSecond(1690034000), true);
             session.persist(person);
             person.setName("Hello");
             return person;
         });
         System.out.println(finalPerson);
+    }
+
+    @Test
+    void testSaveSecondTime() {
+        Person finalPerson = HibernateUtil.doInSessionWithTransactionReturning(session -> {
+            Person person = new Person("Stas Save", Instant.ofEpochSecond(1690034000), true);
+            session.save(person);
+            session.save(person);
+            return person;
+        });
+        System.out.println(finalPerson);
+    }
+
+    @Test
+    void testPersistSecondTime() {
+        Person finalPerson = HibernateUtil.doInSessionWithTransactionReturning(session -> {
+            Person person = new Person("Stas Save", Instant.ofEpochSecond(1690034000), true);
+            session.persist(person);
+            session.persist(person);
+            return person;
+        });
+        System.out.println(finalPerson);
+    }
+
+    @Test
+    void testSaveOrUpdate() {
+        HibernateUtil.doInSessionWithTransaction(session -> {
+            Person person = new Person("Stas >Save<OrUpdate", Instant.ofEpochSecond(1690034000), true);
+            session.saveOrUpdate(person);
+        });
+
+        List<Person> persons = HibernateUtil.doInSessionReturning(session -> {
+            Query<Person> query = session.createQuery("FROM Person", Person.class);
+            return query.list();
+        });
+
+        System.out.println(persons);
     }
 
 }
