@@ -10,7 +10,6 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 // not a singleton really, simplified for example
 public final class HibernateUtil {
@@ -47,31 +46,29 @@ public final class HibernateUtil {
     }
 
     public static <T> T doInSessionWithTransactionReturning(Function<Session, T> sessionFunction) {
-        Session session = getInstance().getSessionFactory().getCurrentSession();
-        try {
-            session.getTransaction().begin();
-            T result = sessionFunction.apply(session);
-            session.getTransaction().commit();
-            return result;
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-            throw new RuntimeException("Something went wrong when performing operations with db", e);
-        } finally {
-            session.close();
+        try (Session session = getInstance().getSessionFactory().openSession()) {
+            try {
+                session.getTransaction().begin();
+                T result = sessionFunction.apply(session);
+                session.getTransaction().commit();
+                return result;
+            } catch (Exception e) {
+                session.getTransaction().rollback();
+                throw new RuntimeException("Something went wrong when performing operations with db", e);
+            }
         }
     }
 
     public static void doInSessionWithTransaction(Consumer<Session> sessionConsumer) {
-        Session session = getInstance().getSessionFactory().getCurrentSession();
-        try {
-            session.getTransaction().begin();
-            sessionConsumer.accept(session);
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-            throw new RuntimeException("Something went wrong when performing operations with db", e);
-        } finally {
-            session.close();
+        try (Session session = getInstance().getSessionFactory().openSession()) {
+            try {
+                session.getTransaction().begin();
+                sessionConsumer.accept(session);
+                session.getTransaction().commit();
+            } catch (Exception e) {
+                session.getTransaction().rollback();
+                throw new RuntimeException("Something went wrong when performing operations with db", e);
+            }
         }
     }
 

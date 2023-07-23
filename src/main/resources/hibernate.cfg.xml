@@ -12,7 +12,6 @@
         <property name="connection.url">jdbc:postgresql://localhost:5442/test-hibernate</property>
         <property name="connection.username">user</property>
         <property name="connection.password">password</property>
-        <property name="hibernate.current_session_context_class">thread</property>
         <property name="hibernate.hbm2ddl.auto">create-drop</property>
         <!-- SQL dialect -->
         <property name="dialect">org.hibernate.dialect.PostgreSQLDialect</property>
