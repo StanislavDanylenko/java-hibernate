@@ -23,7 +23,7 @@ class CreateTest {
     void testSave() {
         HibernateUtil.doInSessionWithTransactionReturning(session -> {
             Person person = new Person("Stas Save", Instant.ofEpochSecond(1690034000), true);
-            session.save(person); // save and populate ID
+            Integer id = (Integer) session.save(person);// save and populate ID
             return person;
         });
 
@@ -66,22 +66,20 @@ class CreateTest {
         System.out.println(persons);
     }
 
-    // we can see insert statement but probably in Hibernate 6 flush fails
     @Test
     void testSaveOutsideTheTransaction() {
         Session session = HibernateUtil.getInstance().getSessionFactory().openSession();
         Person person = new Person("Stas Without transaction", Instant.ofEpochSecond(1690034000), true);
-        session.save(person);
+        session.save(person); // we can see insert statement but probably in Hibernate 6 flush fails
         session.flush();
         session.close();
     }
 
-    // throws an exception as expected
     @Test
     void testPersistOutsideTheTransaction() {
         Session session = HibernateUtil.getInstance().getSessionFactory().openSession();
         Person person = new Person("Stas Without transaction", Instant.ofEpochSecond(1690034000), true);
-        session.persist(person);
+        session.persist(person); // throws an exception as expected
         session.flush();
         session.close();
     }
@@ -94,7 +92,7 @@ class CreateTest {
             Person person = new Person("Stas Save", Instant.ofEpochSecond(1690034000), true);
             session.save(person);
             person.setName("Hello");
-            return person;
+            return person; // flush on commit dirty check
         });
         System.out.println(finalPerson);
     }
@@ -107,7 +105,7 @@ class CreateTest {
             Person person = new Person("Stas Persist", Instant.ofEpochSecond(1690034000), true);
             session.persist(person);
             person.setName("Hello");
-            return person;
+            return person; // flush on commit dirty check
         });
         System.out.println(finalPerson);
     }
@@ -117,7 +115,7 @@ class CreateTest {
         Person finalPerson = HibernateUtil.doInSessionWithTransactionReturning(session -> {
             Person person = new Person("Stas Save", Instant.ofEpochSecond(1690034000), true);
             session.save(person);
-            session.save(person);
+            session.save(person); // only one query
             return person;
         });
         System.out.println(finalPerson);
@@ -128,7 +126,7 @@ class CreateTest {
         Person finalPerson = HibernateUtil.doInSessionWithTransactionReturning(session -> {
             Person person = new Person("Stas Save", Instant.ofEpochSecond(1690034000), true);
             session.persist(person);
-            session.persist(person);
+            session.persist(person); // only one query
             return person;
         });
         System.out.println(finalPerson);
@@ -144,6 +142,38 @@ class CreateTest {
         List<Person> persons = HibernateUtil.doInSessionReturning(session -> {
             Query<Person> query = session.createQuery("FROM Person", Person.class);
             return query.list();
+        });
+
+        System.out.println(persons);
+    }
+
+    @Test
+    void testSaveDetached() {
+        Person p = HibernateUtil.doInSessionWithTransactionReturning(session -> {
+            Person person = new Person("Stas One and Two times", Instant.ofEpochSecond(1690034000), true);
+            session.save(person); // save first record
+            return person;
+        });
+
+        List<Person> persons = HibernateUtil.doInSessionReturning(session -> {
+            session.save(p); // save second record
+            return session.createQuery("FROM Person").getResultList();
+        });
+
+        System.out.println(persons);
+    }
+
+    @Test
+    void testPersistDetached() {
+        Person p = HibernateUtil.doInSessionWithTransactionReturning(session -> {
+            Person person = new Person("Stas One and Two times", Instant.ofEpochSecond(1690034000), true);
+            session.persist(person);
+            return person;
+        });
+
+        List<Person> persons = HibernateUtil.doInSessionReturning(session -> {
+            session.persist(p); // throws exception
+            return session.createQuery("FROM Person").getResultList();
         });
 
         System.out.println(persons);
