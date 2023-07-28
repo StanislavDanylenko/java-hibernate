@@ -31,6 +31,7 @@
         <mapping class="stanislav.danylenko.hibernate.entities.cache.Book"/>
         <mapping class="stanislav.danylenko.hibernate.entities.cache.BookCache"/>
         <mapping class="stanislav.danylenko.hibernate.entities.lifecycle.Person"/>
+        <mapping class="stanislav.danylenko.hibernate.entities.lifecycle.PersonSequenceKey"/>
     </session-factory>
 
 </hibernate-configuration>

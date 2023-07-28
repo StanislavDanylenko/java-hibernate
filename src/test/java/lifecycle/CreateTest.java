@@ -5,6 +5,7 @@ import org.hibernate.query.Query;
 import org.junit.jupiter.api.Test;
 import stanislav.danylenko.hibernate.config.HibernateUtil;
 import stanislav.danylenko.hibernate.entities.lifecycle.Person;
+import stanislav.danylenko.hibernate.entities.lifecycle.PersonSequenceKey;
 
 import java.time.Instant;
 import java.util.List;
@@ -52,13 +53,13 @@ class CreateTest {
     @Test
     void testPersistPopulateID() {
         HibernateUtil.doInSessionWithTransaction(session -> {
-            Person person = new Person("Stas Persist", Instant.ofEpochSecond(1690034000), true);
+            PersonSequenceKey person = new PersonSequenceKey("Stas Persist");
             session.persist(person);
             session.flush(); // populate ID
         });
 
-        List<Person> persons = HibernateUtil.doInSessionReturning(session -> {
-            Query<Person> query = session.createQuery("FROM Person", Person.class);
+        List<PersonSequenceKey> persons = HibernateUtil.doInSessionReturning(session -> {
+            Query<PersonSequenceKey> query = session.createQuery("FROM PersonSequenceKey", PersonSequenceKey.class);
             return query.list();
         });
 
