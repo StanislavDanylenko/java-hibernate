@@ -20,6 +20,12 @@ class LifecycleTest {
         HibernateUtil.doInSessionWithTransaction(session -> session.persist(person));
         System.out.println(person); // id was changed
 
+        HibernateUtil.doInSessionWithTransaction(session -> {
+            person.setName("Some name merged");
+            session.merge(person);
+        });
+        System.out.println(person); // name was changed
+
         // Detached (session was committed)
         person.setName("Some name Updated");
         System.out.println(person);

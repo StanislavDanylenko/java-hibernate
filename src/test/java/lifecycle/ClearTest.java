@@ -19,10 +19,7 @@ class ClearTest {
         session.persist(person);
         session.close();
 
-        List<Person> persons = HibernateUtil.doInSessionReturning(ses -> {
-            Query<Person> query = ses.createQuery("FROM Person", Person.class);
-            return query.list();
-        });
+        List<Person> persons = getPeople();
         System.out.println(persons);
     }
 
@@ -38,10 +35,7 @@ class ClearTest {
             session.flush(); // - saves nothing, dirty changes were cleared
         });
 
-        List<Person> persons = HibernateUtil.doInSessionReturning(ses -> {
-            Query<Person> query = ses.createQuery("FROM Person", Person.class);
-            return query.list();
-        });
+        List<Person> persons = getPeople();
         System.out.println(persons);
     }
 
@@ -56,10 +50,7 @@ class ClearTest {
             session.flush(); // - saves nothing, instance out of session
         });
 
-        List<Person> persons = HibernateUtil.doInSessionReturning(ses -> {
-            Query<Person> query = ses.createQuery("FROM Person", Person.class);
-            return query.list();
-        });
+        List<Person> persons = getPeople();
         System.out.println(persons);
     }
 
@@ -74,10 +65,7 @@ class ClearTest {
             session.flush(); // - saves nothing, instance out of session
         });
 
-        List<Person> persons = HibernateUtil.doInSessionReturning(ses -> {
-            Query<Person> query = ses.createQuery("FROM Person", Person.class);
-            return query.list();
-        });
+        List<Person> persons = getPeople();
         System.out.println(persons);
     }
 
@@ -93,11 +81,15 @@ class ClearTest {
             session.flush(); // - saves nothing, instance set to readonly
         });
 
-        List<Person> persons = HibernateUtil.doInSessionReturning(ses -> {
+        List<Person> persons = getPeople();
+        System.out.println(persons);
+    }
+
+    private List<Person> getPeople() {
+        return HibernateUtil.doInSessionReturning(ses -> {
             Query<Person> query = ses.createQuery("FROM Person", Person.class);
             return query.list();
         });
-        System.out.println(persons);
     }
 
 }

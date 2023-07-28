@@ -35,7 +35,7 @@ class UpdateTest {
         HibernateUtil.doInSessionWithTransaction(session -> session.saveOrUpdate(person));
 
         persons = getPersons();
-        System.out.println(persons);
+        System.out.println(persons); // updated
     }
 
     @Test
@@ -54,7 +54,26 @@ class UpdateTest {
         HibernateUtil.doInSessionWithTransaction(session -> session.update(person));
 
         persons = getPersons();
+        System.out.println(persons); // updated
+    }
+
+    @Test
+    void testMerge() {
+        HibernateUtil.doInSessionWithTransaction(session -> {
+            Person person = new Person("Stas Persisted", Instant.ofEpochSecond(1690034000), true);
+            session.persist(person);
+        });
+
+        List<Person> persons = getPersons();
         System.out.println(persons);
+
+        Person person = persons.get(0);
+        person.setName("Stas Merged");
+
+        HibernateUtil.doInSessionWithTransaction(session -> session.merge(person));
+
+        persons = getPersons();
+        System.out.println(persons); // updated
     }
 
     @Test
@@ -63,7 +82,20 @@ class UpdateTest {
             Person person = new Person("Stas Saved", Instant.ofEpochSecond(1690034000), true);
             session.save(person);
             person.setName("Stas Updated");
-            session.update(person);
+            session.update(person); // updated
+        });
+
+        List<Person> persons = getPersons();
+        System.out.println(persons);
+    }
+
+    @Test
+    void testPersistThenMerge() {
+        HibernateUtil.doInSessionWithTransaction(session -> {
+            Person person = new Person("Stas Persisted", Instant.ofEpochSecond(1690034000), true);
+            session.persist(person);
+            person.setName("Stas Merged");
+            session.merge(person); // updated
         });
 
         List<Person> persons = getPersons();
@@ -78,7 +110,22 @@ class UpdateTest {
 
             Person person2 = new Person("Stas Updated", Instant.ofEpochSecond(1690034000), true);
             person2.setId(1);
-            session.update(person2);
+            session.update(person2); // exception
+        });
+
+        List<Person> persons = getPersons();
+        System.out.println(persons);
+    }
+
+    @Test
+    void testPersistAndMergeDifferentObjectSuccess() {
+        HibernateUtil.doInSessionWithTransaction(session -> {
+            Person person = new Person("Stas Persisted", Instant.ofEpochSecond(1690034000), true);
+            session.persist(person);
+
+            Person person2 = new Person("Stas Merged", Instant.ofEpochSecond(1690034000), true);
+            person2.setId(1);
+            session.merge(person2); // updated
         });
 
         List<Person> persons = getPersons();
@@ -89,7 +136,18 @@ class UpdateTest {
     void testUpdateNotExistingRecordThrowException() {
         HibernateUtil.doInSessionWithTransaction(session -> {
             Person person = new Person("Stas Saved", Instant.ofEpochSecond(1690034000), true);
-            session.update(person);
+            session.update(person); // exception
+        });
+
+        List<Person> persons = getPersons();
+        System.out.println(persons);
+    }
+
+    @Test
+    void testMergeNotExistingRecordSuccess() {
+        HibernateUtil.doInSessionWithTransaction(session -> {
+            Person person = new Person("Stas Merged", Instant.ofEpochSecond(1690034000), true);
+            session.merge(person); // update
         });
 
         List<Person> persons = getPersons();
@@ -103,7 +161,21 @@ class UpdateTest {
             session.save(person);
             person.setName("Stas Updated");
             session.update(person);
-            session.update(person);
+            session.update(person); // only 1 query
+        });
+
+        List<Person> persons = getPersons();
+        System.out.println(persons);
+    }
+
+    @Test
+    void testPersistThenMergeSeveralTimes() {
+        HibernateUtil.doInSessionWithTransaction(session -> {
+            Person person = new Person("Stas Persisted", Instant.ofEpochSecond(1690034000), true);
+            session.persist(person);
+            person.setName("Stas Merged");
+            session.merge(person);
+            session.merge(person); // only 1 query
         });
 
         List<Person> persons = getPersons();
@@ -120,7 +192,7 @@ class UpdateTest {
 
         HibernateUtil.doInSessionWithTransaction(session -> {
             persisted.setName("Stas Merged");
-            Person mergedInstance = session.merge(persisted);
+            Person mergedInstance = session.merge(persisted); // we must use it instead of function input
 
             persisted.setName("This name marge is lost");
         });
@@ -140,8 +212,8 @@ class UpdateTest {
         HibernateUtil.doInSessionWithTransaction(session -> {
             persisted.setName("Stas Merged");
             Person mergedInstance = session.merge(persisted);
-            session.flush(); // just to show dirty contex check
-            mergedInstance.setName("This name marge saved");
+            session.flush(); // just to show dirty context check
+            mergedInstance.setName("This name marge saved"); // correct instance for update
         });
 
         List<Person> persons = getPersons();
@@ -149,43 +221,35 @@ class UpdateTest {
     }
 
     @Test
-    void testPersistAndMergeDifferentObjectSuccess() {
+    void testUpdateDetached() {
+        Person p = HibernateUtil.doInSessionWithTransactionReturning(session -> {
+            Person person = new Person("Stas Saved", Instant.ofEpochSecond(1690034000), true);
+            session.save(person); // save first record
+            return person;
+        });
+
         HibernateUtil.doInSessionWithTransaction(session -> {
+            p.setName("Stas Updated detached");
+            session.update(p); // update ignored
+        });
+
+        System.out.println(getPersons());
+    }
+
+    @Test
+    void testMergeDetached() {
+        Person p = HibernateUtil.doInSessionWithTransactionReturning(session -> {
             Person person = new Person("Stas Persisted", Instant.ofEpochSecond(1690034000), true);
-            session.persist(person);
-
-            Person person2 = new Person("Stas Merged", Instant.ofEpochSecond(1690034000), true);
-            person2.setId(1);
-            session.merge(person2);
+            session.persist(person); // save first record
+            return person;
         });
 
-        List<Person> persons = getPersons();
-        System.out.println(persons);
-    }
-
-    @Test
-    void testMergeNotExistingRecordSuccess() {
         HibernateUtil.doInSessionWithTransaction(session -> {
-            Person person = new Person("Stas Merged", Instant.ofEpochSecond(1690034000), true);
-            session.merge(person);
+            p.setName("Stas Merged detached");
+            session.merge(p); // update the record
         });
 
-        List<Person> persons = getPersons();
-        System.out.println(persons);
-    }
-
-    @Test
-    void testPersistThenMergeSeveralTimes() {
-        HibernateUtil.doInSessionWithTransaction(session -> {
-            Person person = new Person("Stas Persisted", Instant.ofEpochSecond(1690034000), true);
-            session.persist(person);
-            person.setName("Stas Merged");
-            session.merge(person);
-            session.merge(person);
-        });
-
-        List<Person> persons = getPersons();
-        System.out.println(persons);
+        System.out.println(getPersons());
     }
 
     private static List<Person> getPersons() {

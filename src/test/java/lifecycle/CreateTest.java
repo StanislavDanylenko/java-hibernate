@@ -27,11 +27,7 @@ class CreateTest {
             return person;
         });
 
-        List<Person> persons = HibernateUtil.doInSessionReturning(session -> {
-            Query<Person> query = session.createQuery("FROM Person", Person.class);
-            return query.list();
-        });
-
+        List<Person> persons = getPeople();
         System.out.println(persons);
     }
 
@@ -42,11 +38,7 @@ class CreateTest {
             session.persist(person);
         });
 
-        List<Person> persons = HibernateUtil.doInSessionReturning(session -> {
-            Query<Person> query = session.createQuery("FROM Person", Person.class);
-            return query.list();
-        });
-
+        List<Person> persons = getPeople();
         System.out.println(persons);
     }
 
@@ -139,11 +131,7 @@ class CreateTest {
             session.saveOrUpdate(person);
         });
 
-        List<Person> persons = HibernateUtil.doInSessionReturning(session -> {
-            Query<Person> query = session.createQuery("FROM Person", Person.class);
-            return query.list();
-        });
-
+        List<Person> persons = getPeople();
         System.out.println(persons);
     }
 
@@ -155,11 +143,9 @@ class CreateTest {
             return person;
         });
 
-        List<Person> persons = HibernateUtil.doInSessionReturning(session -> {
-            session.save(p); // save second record
-            return session.createQuery("FROM Person").getResultList();
-        });
+        HibernateUtil.doInSessionWithTransaction(session -> session.save(p)); // save second record
 
+        List<Person> persons = getPeople();
         System.out.println(persons);
     }
 
@@ -171,12 +157,18 @@ class CreateTest {
             return person;
         });
 
-        List<Person> persons = HibernateUtil.doInSessionReturning(session -> {
-            session.persist(p); // throws exception
-            return session.createQuery("FROM Person").getResultList();
-        });
+        HibernateUtil.doInSessionWithTransaction(session -> session.persist(p)); // throw exception
 
+        List<Person> persons = getPeople();
         System.out.println(persons);
+    }
+
+    private static List<Person> getPeople() {
+        List<Person> persons = HibernateUtil.doInSessionReturning(session -> {
+            Query<Person> query = session.createQuery("FROM Person", Person.class);
+            return query.list();
+        });
+        return persons;
     }
 
 }
