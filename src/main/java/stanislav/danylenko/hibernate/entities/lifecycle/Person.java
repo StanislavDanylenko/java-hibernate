@@ -13,6 +13,10 @@ import java.time.Instant;
 @Getter
 @Setter
 @ToString
+@NamedQuery(
+        name="findById",
+        query="SELECT p FROM Person p WHERE p.id = :idparam"
+)
 public class Person {
 
     // hibernate asks sequence for next id before inserting
