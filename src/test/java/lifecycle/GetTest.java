@@ -1,5 +1,6 @@
 package lifecycle;
 
+import org.hibernate.Filter;
 import org.hibernate.IdentifierLoadAccess;
 import org.hibernate.MultiIdentifierLoadAccess;
 import org.junit.jupiter.api.Test;
@@ -194,19 +195,18 @@ class GetTest {
         assertEquals(0, updated);
     }
 
-    /*@Test
+    @Test
     void testFilter() { // returns instance or throw an exception
         HibernateUtil.doInSessionWithTransaction(session -> {
-            Person person = new Person("Stas", Instant.now(), true);
+            Person person = new Person("Stas", Instant.now(), false);
             session.persist(person);
         });
 
-        int updated = HibernateUtil.doInSessionWithTransactionReturning(session ->
-                session.create("DELETE from Person where id = 1").executeUpdate());
-        assertEquals(1, updated);
-
-        updated = HibernateUtil.doInSessionWithTransactionReturning(session ->
-                session.createMutationQuery("DELETE from Person where id = 2").executeUpdate());
-        assertEquals(0, updated);
-    }*/
+        List<Person> people = HibernateUtil.doInSessionReturning(session -> {
+            Filter filter = session.enableFilter("testFilter");
+            filter.setParameter("testVal", true);
+            return session.createQuery("FROM Person", Person.class).getResultList();
+        });
+        System.out.println(people);
+    }
 }
